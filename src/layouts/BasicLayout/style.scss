@@ -1,0 +1,85 @@
+.page__layout {
+  min-height: 100vh;
+}
+
+.page__hd {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  min-width: 960px;
+  padding: 0 20px;
+  color: #fff;
+  font-weight: 500;
+  background-color: #090723;
+  .header-logo {
+    width: 200px;
+    text-align: left;
+    a {
+      display: block;
+      position: relative;
+      padding: 0;
+      margin: 0;
+      text-decoration: none;
+    }
+    img {
+      height: 42px;
+      vertical-align: middle;
+    }
+    img:hover {
+      animation: logo-spin 0.3s linear;
+    }
+  }
+  .header-title {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 18px;
+    letter-spacing: 4px;
+  }
+  .header-navbar {
+    font-size: 14px;
+  }
+  .header-user {
+    position: relative;
+    width: 200px;
+    padding: 0 20px;
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 14px;
+    text-align: right;
+    transition: all 0.3s;
+    -moz-transition: all 0.3s;
+    -webkit-transition: all 0.3s;
+    -o-transition: all 0.3s;
+    i.anticon {
+      font-size: 22px;
+    }
+  }
+  .header-user:hover {
+    color: #e9e7ef;
+    font-weight: 500;
+  }
+  @keyframes logo-spin {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(-5deg);
+    }
+  }
+}
+
+.page__bd {
+  padding: 40px 50px;
+  background-color: #fff;
+}
+
+.page__hd,
+.page__ft {
+  text-align: center;
+}
+
+.page__ft {
+  color: #999;
+  line-height: 1.5;
+  font-size: 12px;
+  background-color: #f0f2f5;
+  // font-family: 'Lato', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+}
