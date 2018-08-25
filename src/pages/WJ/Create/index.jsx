@@ -1,5 +1,8 @@
 import React, { Component } from 'react';
+import { connect } from 'react-redux';
 import { Row, Col, BackTop, Form, Icon, Button, message } from 'antd';
+import axios from 'axios';
+import qs from 'qs';
 import BasicLayout from '@/layouts/BasicLayout';
 import AddFormTitle from '@/components/AddFormTitle';
 import AddFormItems from '@/components/AddFormItems';
@@ -7,28 +10,31 @@ import AddFormItems from '@/components/AddFormItems';
 const FormItem = Form.Item;
 
 class CreateWJ extends Component {
+  state = {
+    user_required: false
+  };
   /**
    * @description 生成指定长度的随机字符串
    * @param {number} [len=8]
    * @returns
    */
   componentDidMount() {
-    let { token, admin } = sessionStorage;
-    if (!token || !admin) {
+    let { token, username } = sessionStorage;
+    if (!token || !username) {
       message.info('请登录');
-      this.props.history.replace('/login');
+      // this.props.history.replace('/login');
     }
   }
 
-  randomString = (len = 8) => {
-    let chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890';
+  randomString = (len = 6) => {
+    let chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890!@#$%^&_';
     /* 用作验证码时可去掉了容易混淆的字符 0Oo,1LlI,9gq,Vv,Uu,Zz2 */
     let maxPos = chars.length;
     let pwd = '';
     for (let i = 0; i < len; i++) {
       pwd += chars.charAt(Math.floor(Math.random() * maxPos));
     }
-    return pwd;
+    return pwd + (Date.now() / 1000).toFixed(0);
   };
   /**
    * @description 删除问题或选项，1删除选项2删除问题和选项
@@ -41,6 +47,7 @@ class CreateWJ extends Component {
     // can use data-binding to get
     let qKeys = form.getFieldValue('qKeys');
     let aKeys = form.getFieldValue('aKeys');
+    let tKeys = form.getFieldValue('tKeys');
     // We need at least one item
     if (aKeys.length === 1 || (qKeys.length === 1 && type === 2)) {
       return;
@@ -54,31 +61,35 @@ class CreateWJ extends Component {
         qKeys = qKeys.filter(i => i !== k);
         aKeys = aKeys.filter(i => i.qkey !== k);
         break;
+      case 3:
+        tKeys = tKeys.filter(i => i !== k);
+        break;
       default:
         return;
     }
     // can use data-binding to set
-    form.setFieldsValue({ qKeys, aKeys });
+    form.setFieldsValue({ qKeys, aKeys, tKeys });
   };
   /**
-   * @description 新增问题或选项，1增加选项2增加问题和选项
+   * @description 新增问题或选项，1增加选项2增加问题和选项3增加用户验证字段
    * @param {*} key
    * @param {number} [type=2]
    * @returns
    */
   addItem = (key, type = 2) => {
     const { form } = this.props;
+    const randomKey = this.randomString();
     // can use data-binding to get
-    let randomKey = this.randomString();
     let qKeys = form.getFieldValue('qKeys');
     let aKeys = form.getFieldValue('aKeys');
+    let tKeys = form.getFieldValue('tKeys');
     // Selective modification value
     switch (type) {
       case 1:
         aKeys = [
           ...aKeys,
           {
-            key: this.randomString(10),
+            key: this.randomString(),
             qkey: key
           }
         ];
@@ -88,21 +99,32 @@ class CreateWJ extends Component {
         aKeys = [
           ...aKeys,
           {
-            key: this.randomString(10),
+            key: this.randomString(),
             qkey: randomKey
           },
           {
-            key: this.randomString(10),
+            key: this.randomString(),
             qkey: randomKey
           }
         ];
+        break;
+      case 3:
+        tKeys = [...tKeys, this.randomString()];
         break;
       default:
         return;
     }
     // can use data-binding to set
     // important! notify form to detect changes
-    form.setFieldsValue({ qKeys, aKeys });
+    form.setFieldsValue({ qKeys, aKeys, tKeys });
+  };
+  onChange = e => {
+    this.setState({ user_required: e });
+    if (e) {
+      this.addItem('key', 3);
+    } else {
+      this.props.form.setFieldsValue({ tKeys: [] });
+    }
   };
   /**
    * @description 标准化表单值，验证后提交至后台
@@ -113,29 +135,75 @@ class CreateWJ extends Component {
     const { validateFields } = this.props.form;
     validateFields((err, values) => {
       if (!err) {
-        let { qKeys, aKeys, question, answer, required, type, title, subtitle } = values;
+        let { qKeys, aKeys, question, answer, required, type } = values;
+        let { tKeys, field_title, field_option } = values;
+        let { title, subtitle, user_required, start_at, end_at } = values;
         let questions = qKeys.map((key, idx) => ({
           key,
-          label: question[key],
-          serial_num: idx,
+          input_title: question[key],
+          input_num: idx + 1,
           input_type: type[key],
           is_required: required[key]
         }));
-        let answers = [];
+        let options = [];
         qKeys.forEach(key => {
-          answers = [
-            ...answers,
+          options = [
+            ...options,
             ...aKeys.filter(i => i.qkey === key).map((item, idx) => ({
               key: item.key,
               qKey: item.qkey,
-              label: answer[item.key],
-              value: String.fromCharCode(idx + 65)
+              field_label: answer[item.key],
+              field_value: String.fromCharCode(idx + 65)
             }))
           ];
         });
-        console.log(title, subtitle, questions, answers);
+        let validate_field = tKeys.map((key, idx) => ({
+          key,
+          input_title: field_title[key],
+          input_num: idx + 1,
+          input_type: !!Object.keys(field_option).length,
+          input_options: field_option[key].map((ele, i) => ({
+            field_label: ele,
+            field_value: String.fromCharCode(i + 65)
+          }))
+        }));
+        let category = {
+          title,
+          description: subtitle,
+          start_at: start_at.format('YYYY-MM-DD HH:ss:00'),
+          end_at: end_at.format('YYYY-MM-DD HH:ss:00'),
+          user_required: user_required
+        };
+        let formData = {
+          questions,
+          options,
+          category,
+          validate_field
+        };
+        console.log(formData);
       }
     });
+  };
+  createSurvey = data => {
+    if (!data) return;
+    const { baseUrl } = this.props;
+    const { token } = sessionStorage;
+    const params = qs.stringify(data);
+    axios
+      .post(`${baseUrl}/`, params, {
+        header: {
+          Authorization: `Bearer ${token}`
+        }
+      })
+      .then(res => {
+        // TODO: 创建成功后跳转到主页面
+        if (res.status >= 200 && res.status <= 300) {
+          console.log(res);
+        }
+      })
+      .catch(err => {
+        message.error(err.response.status);
+      });
   };
   render() {
     const { getFieldDecorator, getFieldValue } = this.props.form;
@@ -158,6 +226,7 @@ class CreateWJ extends Component {
     };
     getFieldDecorator('qKeys', { initialValue: [] });
     getFieldDecorator('aKeys', { initialValue: [] });
+    getFieldDecorator('tKeys', { initialValue: [] });
     return (
       <BasicLayout history={this.props.history}>
         <Row type="flex" justify="center">
@@ -167,6 +236,12 @@ class CreateWJ extends Component {
                 form={this.props.form}
                 formItemLayout={formItemLayout}
                 formItemLayoutWithRight={formItemLayoutWithRight}
+                formItemLayoutWithOutLabel={formItemLayoutWithOutLabel}
+                tKeys={getFieldValue('tKeys')}
+                userRequired={this.state.user_required}
+                onChange={this.onChange}
+                removeItem={this.removeItem}
+                addItem={this.addItem}
               />
               <AddFormItems
                 form={this.props.form}
@@ -197,4 +272,8 @@ class CreateWJ extends Component {
   }
 }
 
-export default Form.create()(CreateWJ);
+const mapStateToProps = state => ({
+  baseUrl: state.baseUrl
+});
+
+export default connect(mapStateToProps)(Form.create()(CreateWJ));
