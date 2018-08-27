@@ -1,7 +1,10 @@
 import React, { Component } from 'react';
+import { connect } from 'react-redux';
 import { Modal, BackTop, message } from 'antd';
 import BasicLayout from '@/layouts/BasicLayout';
 import DataList from '@/components/DataList';
+import axios from 'axios';
+import qs from 'qs';
 
 class ExistWJ extends Component {
   state = {
@@ -36,11 +39,13 @@ class ExistWJ extends Component {
     ]
   };
   componentDidMount() {
-    let { token, admin } = sessionStorage;
-    if (!token || !admin) {
+    let { token } = sessionStorage;
+    if (!token) {
       message.info('请登录');
       this.props.history.replace('/login');
-    }
+    } else {
+			this.getWjList();
+		}
   }
   HandleJumpPage = (id, type = 1) => {
     if (!id) {
@@ -68,6 +73,24 @@ class ExistWJ extends Component {
       }
     });
   };
+	getWjList = () => {
+		const { token } = sessionStorage;
+		const { baseUrl } = this.props;
+		axios
+			.get(`${baseUrl}/ques`, {
+				headers: {
+					'Authorization':`Bearer ${token}`,
+				}
+			})
+			.then(res => {
+				if(res.status >= 200 && res.status <= 300) {
+					console.log(res);
+				}
+			})
+			.catch(err => {
+				console.log(err.response.status)
+			})
+	}
   render() {
     return (
       <BasicLayout history={this.props.history}>
@@ -82,4 +105,8 @@ class ExistWJ extends Component {
   }
 }
 
-export default ExistWJ;
+const mapStateToProps = state => ({
+  baseUrl: state.baseUrl
+});
+
+export default connect(mapStateToProps)(ExistWJ);

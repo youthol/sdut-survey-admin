@@ -20,6 +20,7 @@ class Login extends Component {
     validateFields((err, values) => {
       if (!err) {
         console.log(values);
+				this.postLogin(values);
         sessionStorage.setItem('token', 'ACCESS_TOKEN');
         sessionStorage.setItem('expires_at', 'EXPIRES_AT');
         sessionStorage.setItem('username', 'ADMIN');
@@ -33,7 +34,11 @@ class Login extends Component {
     const { baseUrl } = this.props;
     const params = qs.stringify(data);
     axios
-      .post(`${baseUrl}/`, params)
+      .post(`${baseUrl}/ques/login`, params,{
+// 				header:{
+// 					'Content-Type': 'application/json'
+// 				}
+			})
       .then(res => {
         // TODO: 验证返回数据，并且存用户token,expires_in，并且用token请求用户数据
         if (res.status >= 200 && res.status <= 300) {
@@ -41,7 +46,8 @@ class Login extends Component {
         }
       })
       .catch(err => {
-        message.error(err.response.status);
+				console.log(err)
+        // message.error(err.response.status);
       });
   };
   getUserInfo = token => {
