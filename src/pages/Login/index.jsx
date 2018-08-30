@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { Form, message } from 'antd';
+import moment from 'moment';
 import axios from 'axios';
 import qs from 'qs';
 import BasicLayout from '@/layouts/BasicLayout';
@@ -19,12 +20,7 @@ class Login extends Component {
     const { validateFields } = this.props.form;
     validateFields((err, values) => {
       if (!err) {
-        console.log(values);
-        sessionStorage.setItem('token', 'ACCESS_TOKEN');
-        sessionStorage.setItem('expires_at', 'EXPIRES_AT');
-        sessionStorage.setItem('username', 'ADMIN');
-        message.success('登录成功');
-        this.props.history.push('/');
+        this.postLogin(values);
       }
     });
   };
@@ -33,30 +29,22 @@ class Login extends Component {
     const { baseUrl } = this.props;
     const params = qs.stringify(data);
     axios
-      .post(`${baseUrl}/`, params)
+      .post(`${baseUrl}/ques/login`, params)
       .then(res => {
         // TODO: 验证返回数据，并且存用户token,expires_in，并且用token请求用户数据
         if (res.status >= 200 && res.status <= 300) {
-          console.log(res);
+          const { access_token, expires_in } = res.data.data;
+          const expires_at = moment()
+            .add(expires_in, 'second')
+            .format('YYYY-MM-DD HH:mm:ss');
+          sessionStorage.clear();
+          sessionStorage.setItem('token', access_token);
+          sessionStorage.setItem('expires_at', expires_at);
+          this.props.history.push('/');
         }
       })
       .catch(err => {
-        message.error(err.response.status);
-      });
-  };
-  getUserInfo = token => {
-    if (!token) return;
-    const { baseUrl } = this.props;
-    axios
-      .get(`${baseUrl}/`)
-      .then(res => {
-        // TODO: 验证返回数据，并且存用户信息
-        if (res.status >= 200 && res.status <= 300) {
-          console.log(res);
-        }
-      })
-      .catch(err => {
-        message.error(err.response.status);
+        message.error(err.response.data.message);
       });
   };
   render() {

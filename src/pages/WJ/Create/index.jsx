@@ -218,7 +218,7 @@ class CreateWJ extends Component {
     const { token } = sessionStorage;
     const params = qs.stringify(data);
     axios
-      .post(`${baseUrl}/`, params, {
+      .post(`${baseUrl}/ques/create`, params, {
         header: {
           Authorization: `Bearer ${token}`
         }
@@ -227,10 +227,11 @@ class CreateWJ extends Component {
         // TODO: 创建成功后跳转到主页面
         if (res.status >= 200 && res.status <= 300) {
           console.log(res);
+          this.props.history.push('/');
         }
       })
       .catch(err => {
-        message.error(err.response.status);
+        message.error(err.response.data.message);
       });
   };
   render() {

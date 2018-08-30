@@ -32,9 +32,7 @@ class BasicLayout extends Component {
       okText: '是',
       cancelText: '否',
       onOk: () => {
-        sessionStorage.removeItem('token');
-        sessionStorage.removeItem('expires_at');
-        sessionStorage.removeItem('admin');
+        sessionStorage.clear();
         message.success('已退出');
         this.setState({ isAuth: false });
         if (this.props.history.location.pathname !== '/') {
