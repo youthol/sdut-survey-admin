@@ -6,6 +6,7 @@ import qs from 'qs';
 import BasicLayout from '@/layouts/BasicLayout';
 import AddFormTitle from '@/components/AddFormTitle';
 import AddFormItems from '@/components/AddFormItems';
+import { deflate } from 'zlib';
 
 const FormItem = Form.Item;
 
@@ -125,6 +126,33 @@ class CreateWJ extends Component {
     } else {
       this.props.form.setFieldsValue({ tKeys: [] });
     }
+  };
+  /**
+   * @description 根据题型增删选项和新增按钮
+   * @param {*} e
+   * @param {*} key
+   * @returns
+   */
+  handleTypeChange = (e, key) => {
+    console.log(e.target.value, key);
+    const { value } = e.target;
+    if (!value) return;
+    const { form } = this.props;
+    let aKeys = form.getFieldValue('aKeys');
+    switch (value) {
+      case '3':
+        aKeys = aKeys.filter(el => el.qkey !== key);
+        break;
+      default:
+        aKeys = [
+          ...aKeys,
+          {
+            key: this.randomString(),
+            qkey: key
+          }
+        ];
+    }
+    form.setFieldsValue({ aKeys });
   };
   /**
    * @description 标准化表单值，验证后提交至后台
@@ -253,6 +281,7 @@ class CreateWJ extends Component {
                 aKeys={getFieldValue('aKeys')}
                 removeItem={this.removeItem}
                 addItem={this.addItem}
+                handleTypeChange={this.handleTypeChange}
               />
               <FormItem {...formItemLayoutWithOutLabel}>
                 <Button type="dashed" onClick={this.addItem} style={formItemLayoutWithRight}>
