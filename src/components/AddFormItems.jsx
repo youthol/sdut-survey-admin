@@ -6,7 +6,7 @@ const FormItem = Form.Item;
 const RadioGroup = Radio.Group;
 
 const AddFormItems = props => {
-  const { getFieldDecorator } = props.form;
+  const { getFieldDecorator, getFieldValue } = props.form;
 
   return (
     <div>
@@ -44,7 +44,7 @@ const AddFormItems = props => {
                 validateTrigger: ['onChange', 'onBlur'],
                 initialValue: '1'
               })(
-                <RadioGroup>
+                <RadioGroup onChange={e => props.handleTypeChange(e, key)}>
                   <Radio value="1">单选</Radio>
                   <Radio value="2">多选</Radio>
                   <Radio value="3">填空</Radio>
@@ -86,11 +86,13 @@ const AddFormItems = props => {
                   ) : null}
                 </FormItem>
               ))}
-            <FormItem {...props.formItemLayoutWithOutLabel}>
-              <Button type="dashed" onClick={() => props.addItem(key, 1)}>
-                <Icon type="plus" /> 新增选项
-              </Button>
-            </FormItem>
+            {getFieldValue(`type[${key}]`) === '3' ? null : (
+              <FormItem {...props.formItemLayoutWithOutLabel}>
+                <Button type="dashed" onClick={() => props.addItem(key, 1)}>
+                  <Icon type="plus" /> 新增选项
+                </Button>
+              </FormItem>
+            )}
           </Card>
         ))}
     </div>
