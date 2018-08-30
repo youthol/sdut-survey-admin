@@ -20,6 +20,7 @@ class Login extends Component {
     const { validateFields } = this.props.form;
     validateFields((err, values) => {
       if (!err) {
+
         this.postLogin(values);
       }
     });
