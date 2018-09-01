@@ -182,7 +182,7 @@ class CreateWJ extends Component {
           options = [
             ...options,
             ...aKeys.filter(i => i.qkey === key).map((item, idx) => ({
-              key: item.key,
+              // key: item.key,
               qKey: item.qkey,
               field_label: answer[item.key],
               field_value: String.fromCharCode(idx + 65),
@@ -193,11 +193,11 @@ class CreateWJ extends Component {
           key,
           input_title: field_title[key],
           input_num: idx + 1,
-          input_type: !!Object.keys(field_option).length,
-          input_options: field_option[key].map((ele, i) => ({
+          input_type: field_option[key] && field_option[key].length ? 1 : 0,
+          input_options: field_option[key] && field_option[key].map((ele, i) => ({
             field_label: ele,
             field_value: String.fromCharCode(i + 65),
-          })),
+          }))
         }));
         let category = {
           title,
@@ -213,6 +213,7 @@ class CreateWJ extends Component {
           validate_field,
         };
         console.log(formData);
+				this.createSurvey(formData);
       }
     });
   };

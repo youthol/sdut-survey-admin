@@ -6,6 +6,7 @@ import axios from 'axios';
 import BasicLayout from '@/layouts/BasicLayout';
 import DataList from '@/components/DataList';
 import { updateSurveyList, clearSurveyList } from '@/actions/invests';
+import qs from 'qs';
 
 class ExistWJ extends Component {
   state = {
@@ -73,7 +74,6 @@ class ExistWJ extends Component {
         console.log(err);
       });
   };
-
   render() {
     return (
       <BasicLayout history={this.props.history}>
