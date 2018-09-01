@@ -19,7 +19,7 @@ const ExistDataList = props => {
             align="center"
             render={text => (
               <div title={text.description}>
-                {text.description.length > 20
+                {text.description && text.description.length > 20
                   ? `${text.description.substring(0, 20)}....`
                   : text.description}
               </div>
