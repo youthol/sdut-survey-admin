@@ -6,27 +6,27 @@ import qs from 'qs';
 import BasicLayout from '@/layouts/BasicLayout';
 import AddFormTitle from '@/components/AddFormTitle';
 import AddFormItems from '@/components/AddFormItems';
-import { deflate } from 'zlib';
 
 const FormItem = Form.Item;
 
 class CreateWJ extends Component {
   state = {
-    user_required: false
+    user_required: false,
   };
+
+  componentDidMount() {
+    let { token } = sessionStorage;
+    if (!token) {
+      message.info('请登录');
+      this.props.history.replace('/login');
+    }
+  }
+
   /**
    * @description 生成指定长度的随机字符串
    * @param {number} [len=8]
    * @returns
    */
-  componentDidMount() {
-    let { token, username } = sessionStorage;
-    if (!token || !username) {
-      message.info('请登录');
-      // this.props.history.replace('/login');
-    }
-  }
-
   randomString = (len = 6) => {
     let chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890!@#$%^&_';
     /* 用作验证码时可去掉了容易混淆的字符 0Oo,1LlI,9gq,Vv,Uu,Zz2 */
@@ -37,6 +37,7 @@ class CreateWJ extends Component {
     }
     return pwd + (Date.now() / 1000).toFixed(0);
   };
+
   /**
    * @description 删除问题或选项，1删除选项2删除问题和选项
    * @param {*} k
@@ -91,8 +92,8 @@ class CreateWJ extends Component {
           ...aKeys,
           {
             key: this.randomString(),
-            qkey: key
-          }
+            qkey: key,
+          },
         ];
         break;
       case 2:
@@ -101,12 +102,12 @@ class CreateWJ extends Component {
           ...aKeys,
           {
             key: this.randomString(),
-            qkey: randomKey
+            qkey: randomKey,
           },
           {
             key: this.randomString(),
-            qkey: randomKey
-          }
+            qkey: randomKey,
+          },
         ];
         break;
       case 3:
@@ -119,6 +120,7 @@ class CreateWJ extends Component {
     // important! notify form to detect changes
     form.setFieldsValue({ qKeys, aKeys, tKeys });
   };
+
   onChange = e => {
     this.setState({ user_required: e });
     if (e) {
@@ -127,6 +129,7 @@ class CreateWJ extends Component {
       this.props.form.setFieldsValue({ tKeys: [] });
     }
   };
+
   /**
    * @description 根据题型增删选项和新增按钮
    * @param {*} e
@@ -148,12 +151,13 @@ class CreateWJ extends Component {
           ...aKeys,
           {
             key: this.randomString(),
-            qkey: key
-          }
+            qkey: key,
+          },
         ];
     }
     form.setFieldsValue({ aKeys });
   };
+
   /**
    * @description 标准化表单值，验证后提交至后台
    * @param {*} e
@@ -171,7 +175,7 @@ class CreateWJ extends Component {
           input_title: question[key],
           input_num: idx + 1,
           input_type: type[key],
-          is_required: required[key]
+          is_required: required[key],
         }));
         let options = [];
         qKeys.forEach(key => {
@@ -181,8 +185,8 @@ class CreateWJ extends Component {
               // key: item.key,
               qKey: item.qkey,
               field_label: answer[item.key],
-              field_value: String.fromCharCode(idx + 65)
-            }))
+              field_value: String.fromCharCode(idx + 65),
+            })),
           ];
         });
         let validate_field = tKeys.map((key, idx) => ({
@@ -192,27 +196,28 @@ class CreateWJ extends Component {
           input_type: field_option[key] && field_option[key].length ? 1 : 0,
           input_options: field_option[key] && field_option[key].map((ele, i) => ({
             field_label: ele,
-            field_value: String.fromCharCode(i + 65)
-          })) || null
+            field_value: String.fromCharCode(i + 65),
+          }))
         }));
         let category = {
           title,
           description: subtitle,
           start_at: start_at.format('YYYY-MM-DD HH:ss:00'),
           end_at: end_at.format('YYYY-MM-DD HH:ss:00'),
-          user_required: user_required
+          user_required: user_required,
         };
         let formData = {
           questions,
           options,
           category,
-          validate_field
+          validate_field,
         };
         console.log(formData);
 				this.createSurvey(formData);
       }
     });
   };
+
   createSurvey = data => {
     if (!data) return;
     const { baseUrl } = this.props;
@@ -220,9 +225,9 @@ class CreateWJ extends Component {
     const params = qs.stringify(data);
     axios
       .post(`${baseUrl}/ques/create`, params, {
-        header: {
-          // Authorization: `Bearer ${token}`
-        }
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       })
       .then(res => {
         // TODO: 创建成功后跳转到主页面
@@ -235,24 +240,25 @@ class CreateWJ extends Component {
         message.error(err.response.data.message);
       });
   };
+
   render() {
     const { getFieldDecorator, getFieldValue } = this.props.form;
     const formItemLayout = {
       labelCol: {
         xs: { span: 24 },
-        sm: { span: 4 }
+        sm: { span: 4 },
       },
       wrapperCol: {
         xs: { span: 24 },
-        sm: { span: 16 }
-      }
+        sm: { span: 16 },
+      },
     };
     const formItemLayoutWithRight = { width: '80%', marginRight: 8 };
     const formItemLayoutWithOutLabel = {
       wrapperCol: {
         xs: { span: 24, offset: 0 },
-        sm: { span: 16, offset: 4 }
-      }
+        sm: { span: 16, offset: 4 },
+      },
     };
     getFieldDecorator('qKeys', { initialValue: [] });
     getFieldDecorator('aKeys', { initialValue: [] });
@@ -304,7 +310,7 @@ class CreateWJ extends Component {
 }
 
 const mapStateToProps = state => ({
-  baseUrl: state.baseUrl
+  baseUrl: state.baseUrl,
 });
 
 export default connect(mapStateToProps)(Form.create()(CreateWJ));
