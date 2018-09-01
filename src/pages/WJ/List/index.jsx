@@ -1,47 +1,25 @@
 import React, { Component } from 'react';
+import { bindActionCreators } from 'redux';
+import { connect } from 'react-redux';
 import { Modal, BackTop, message } from 'antd';
+import axios from 'axios';
 import BasicLayout from '@/layouts/BasicLayout';
 import DataList from '@/components/DataList';
+import { updateSurveyList, clearSurveyList } from '@/actions/invests';
 
 class ExistWJ extends Component {
   state = {
-    data: [
-      {
-        key: '1',
-        author: '青春在线',
-        title: '新学期学生思想动态调查问卷',
-        subtitle:
-          '为了解我校学生开学初思想动态情况，我们设计了此调查问卷，请认真填写此问卷。此次调查为不记名方式，我们将对调查数据完全保密，并且不做任何商业用途，希望能够了解到你的真实想法。本次调研，除特殊说明的问题外均为单选，谢谢你的支持与合作! ',
-        created_at: '2018-08-17 15:32:00',
-        updated_at: '2018-08-17 15:32:00'
-      },
-      {
-        key: '2',
-        author: '青春在线',
-        title: '新学期学生思想动态调查问卷',
-        subtitle:
-          '为了解我校学生开学初思想动态情况，我们设计了此调查问卷，请认真填写此问卷。此次调查为不记名方式，我们将对调查数据完全保密，并且不做任何商业用途，希望能够了解到你的真实想法。本次调研，除特殊说明的问题外均为单选，谢谢你的支持与合作! ',
-        created_at: '2018-08-17 15:32:00',
-        updated_at: '2018-08-17 15:32:00'
-      },
-      {
-        key: '3',
-        author: '青春在线',
-        title: '新学期学生思想动态调查问卷',
-        subtitle:
-          '为了解我校学生开学初思想动态情况，我们设计了此调查问卷，请认真填写此问卷。此次调查为不记名方式，我们将对调查数据完全保密，并且不做任何商业用途，希望能够了解到你的真实想法。本次调研，除特殊说明的问题外均为单选，谢谢你的支持与合作! ',
-        created_at: '2018-08-17 15:32:00',
-        updated_at: '2018-08-17 15:32:00'
-      }
-    ]
+    data: [],
   };
   componentDidMount() {
-    let { token, admin } = sessionStorage;
-    if (!token || !admin) {
+    let { token } = sessionStorage;
+    if (!token) {
       message.info('请登录');
       this.props.history.replace('/login');
     }
+    this.getSurveyList();
   }
+
   HandleJumpPage = (id, type = 1) => {
     if (!id) {
       return;
@@ -57,6 +35,7 @@ class ExistWJ extends Component {
         return;
     }
   };
+
   handleDelete = e => {
     Modal.confirm({
       title: '是否删除这个问卷和作答',
@@ -65,9 +44,36 @@ class ExistWJ extends Component {
       cancelText: '否',
       onOk: () => {
         message.success('已删除');
-      }
+      },
     });
   };
+
+  getSurveyList = e => {
+    const { token } = sessionStorage;
+    if (!token) return;
+    const { baseUrl } = this.props;
+
+    axios
+      .get(`${baseUrl}/ques`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then(res => {
+        if (res.status >= 200 && res.status <= 300) {
+          const data = res.data.data.map(item => ({
+            ...item,
+            key: item.id,
+          }));
+          this.setState({ data });
+          this.props.updateSurveyList(data);
+        }
+      })
+      .catch(err => {
+        console.log(err);
+      });
+  };
+
   render() {
     return (
       <BasicLayout history={this.props.history}>
@@ -82,4 +88,17 @@ class ExistWJ extends Component {
   }
 }
 
-export default ExistWJ;
+const mapStateToProps = state => ({
+  baseUrl: state.baseUrl,
+  invests: state.invests,
+});
+
+const mapDispatchToProps = dispatch => ({
+  updateSurveyList: bindActionCreators(updateSurveyList, dispatch),
+  clearSurveyList: bindActionCreators(clearSurveyList, dispatch),
+});
+
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps,
+)(ExistWJ);

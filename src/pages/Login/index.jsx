@@ -31,7 +31,6 @@ class Login extends Component {
     axios
       .post(`${baseUrl}/ques/login`, params)
       .then(res => {
-        // TODO: 验证返回数据，并且存用户token,expires_in，并且用token请求用户数据
         if (res.status >= 200 && res.status <= 300) {
           const { access_token, expires_in } = res.data.data;
           const expires_at = moment()
@@ -57,7 +56,7 @@ class Login extends Component {
 }
 
 const mapStateToProps = state => ({
-  baseUrl: state.baseUrl
+  baseUrl: state.baseUrl,
 });
 
 export default connect(mapStateToProps)(Form.create()(Login));
