@@ -35,12 +35,12 @@ const ExistDataList = props => {
             title="操作"
             key="action"
             align="center"
-            render={() => (
+            render={text => (
               <Button.Group>
                 <Button icon="edit" disabled onClick={e => props.HandleJumpPage(7)} />
                 <Button icon="area-chart" onClick={e => props.HandleJumpPage(7, 2)} />
-                <Button icon="eye-o" href="" />
-                <Button icon="delete" disabled onClick={props.handleDelete} />
+                <Button icon="eye-o" href={`https://lab.youthol.cn/app/survey/#/${text.id}`} />
+                <Button icon="delete" onClick={e => props.handleDelete(text.id)} />
               </Button.Group>
             )}
           />

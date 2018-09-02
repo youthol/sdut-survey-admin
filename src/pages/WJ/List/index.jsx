@@ -6,7 +6,6 @@ import axios from 'axios';
 import BasicLayout from '@/layouts/BasicLayout';
 import DataList from '@/components/DataList';
 import { updateSurveyList, clearSurveyList } from '@/actions/invests';
-import qs from 'qs';
 
 class ExistWJ extends Component {
   state = {
@@ -37,14 +36,14 @@ class ExistWJ extends Component {
     }
   };
 
-  handleDelete = e => {
+  handleDelete = id => {
     Modal.confirm({
       title: '是否删除这个问卷和作答',
       okType: 'danger',
       okText: '是',
       cancelText: '否',
       onOk: () => {
-        message.success('已删除');
+        this.delSurveyById(id);
       },
     });
   };
@@ -74,6 +73,28 @@ class ExistWJ extends Component {
         console.log(err);
       });
   };
+
+  delSurveyById = id => {
+    if (!id) return;
+    const { baseUrl } = this.props;
+    const { token } = sessionStorage;
+    axios
+      .delete(`${baseUrl}/ques/${id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then(res => {
+        if (res.status >= 200 && res.status <= 300) {
+          message.success('已删除');
+          this.getSurveyList();
+        }
+      })
+      .catch(err => {
+        console.log(err);
+      });
+  };
+
   render() {
     return (
       <BasicLayout history={this.props.history}>

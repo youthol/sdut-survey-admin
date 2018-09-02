@@ -194,10 +194,12 @@ class CreateWJ extends Component {
           input_title: field_title[key],
           input_num: idx + 1,
           input_type: field_option[key] && field_option[key].length ? 1 : 0,
-          input_options: field_option[key] && field_option[key].map((ele, i) => ({
-            field_label: ele,
-            field_value: String.fromCharCode(i + 65),
-          }))
+          input_options:
+            field_option[key] &&
+            field_option[key].map((ele, i) => ({
+              field_label: ele,
+              field_value: String.fromCharCode(i + 65),
+            })),
         }));
         let category = {
           title,
@@ -213,7 +215,7 @@ class CreateWJ extends Component {
           validate_field,
         };
         console.log(formData);
-				this.createSurvey(formData);
+        this.createSurvey(formData);
       }
     });
   };
@@ -238,59 +240,8 @@ class CreateWJ extends Component {
       })
       .catch(err => {
         message.error(err.response.data.message);
-// 				err.response.data.errors.forEach(item => {
-// 					message.error(item.join())
-// 				})
-				// console.log(err);
       });
   };
-	
-	postSurveyData = () => {
-		let data = [];
-		let questions = [];
-		let validate_field = [];
-		let options = [];
-		let category = {
-			title: 'qqqqqqqqqqqqpqpqpqq',
-			description: '99999999999999999999999999999999',
-			start_at: '2018-09-01 16:28:00',
-			end_at: '2018-09-01 16:38:00',
-			user_required: true,
-		};
-		for(let i = 0; i < 50; i++) {
-			questions.push({
-				key: this.randomString(),
-				input_title: '999999999999999',
-				input_num: i+1,
-				input_type: 1,
-			})
-		}
-		for(let i = 0; i < 500; i++) {
-			options.push({
-				qkey: '123456789qqqq',
-				field_label: 'qqqqqqqqqppppppppqqqqqqqqq',
-				field_value: 'qqqqqqqqqqqqqkkkkkkkkkkkkqqqqq',
-			})
-		}
-		for(let i = 0; i < 5; i++) {
-			validate_field.push({
-				key: this.randomString(),
-				input_title: 'qlqlqlqlqlqllqlqlq',
-				input_num: i,
-				input_type: 1,
-				input_options: ['1', '2', '3']
-			})
-		}
-		const formData = {
-			questions,
-			options,
-			category,
-			validate_field
-		}
-		console.log(formData)
-		
-		this.createSurvey(formData)
-	}
 
   render() {
     const { getFieldDecorator, getFieldValue } = this.props.form;
