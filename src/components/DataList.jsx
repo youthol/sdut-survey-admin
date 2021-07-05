@@ -6,6 +6,7 @@ import { Table, Button } from 'antd';
 const { Column } = Table;
 
 const ExistDataList = props => {
+  const { token } = sessionStorage;
   return (
     <div>
       {props.data && (
@@ -38,7 +39,11 @@ const ExistDataList = props => {
             render={text => (
               <Button.Group>
                 <Button icon="edit" disabled onClick={e => props.HandleJumpPage(7)} />
-                <Button icon="area-chart" onClick={e => props.HandleJumpPage(7, 2)} />
+                <Button
+                  icon="area-chart"
+                  href={`https://api.youthol.cn/api/ques/${text.id}/export?token=${token}`}
+                  // onClick={e => props.HandleJumpPage(7, 2)}
+                />
                 <Button icon="eye-o" href={`https://lab.youthol.cn/app/survey/#/${text.id}`} />
                 <Button icon="delete" onClick={e => props.handleDelete(text.id)} />
               </Button.Group>

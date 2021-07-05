@@ -204,8 +204,8 @@ class CreateWJ extends Component {
         let category = {
           title,
           description: subtitle,
-          start_at: start_at.format('YYYY-MM-DD HH:ss:00'),
-          end_at: end_at.format('YYYY-MM-DD HH:ss:00'),
+          start_at: start_at.format('YYYY-MM-DD HH:mm:00'),
+          end_at: end_at.format('YYYY-MM-DD HH:mm:00'),
           user_required: user_required,
         };
         let formData = {
@@ -214,7 +214,6 @@ class CreateWJ extends Component {
           category,
           validate_field,
         };
-        console.log(formData);
         this.createSurvey(formData);
       }
     });
